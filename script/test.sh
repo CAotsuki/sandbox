@@ -1,6 +1,7 @@
 #!/bin/zsh
+source .env
 Host=localhost
-Port=8080
+Port=${API_PORT}
 
 function waitStdin() {
   echo ""

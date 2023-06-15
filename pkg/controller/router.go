@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"sandbox/pkg/model/repository"
 )
 
 type Router interface {
@@ -19,13 +20,13 @@ func NewRouter(tc TodoController) Router {
 func (ro *router) HandleTodoRequest(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		ro.tc.GetTodos(w, r)
+		ro.tc.GetTodos(w, r, repository.GetDB())
 	case http.MethodPost:
-		ro.tc.PostTodo(w, r)
+		ro.tc.PostTodo(w, r, repository.GetDB())
 	case http.MethodPut:
-		ro.tc.PutTodo(w, r)
+		ro.tc.PutTodo(w, r, repository.GetDB())
 	case http.MethodDelete:
-		ro.tc.DeleteTodo(w, r)
+		ro.tc.DeleteTodo(w, r, repository.GetDB())
 	default:
 		w.WriteHeader(405)
 	}

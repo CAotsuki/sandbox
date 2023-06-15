@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  db:
+    container_name: db
+    image: postgres:13.11
+    ports:
+      - ${DB_PORT:-5432}:5432
+    volumes:
+      - sandbox-db:/var/lib/postgresql/data
+    networks:
+      sandbox:
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:-postgres}
+      POSTGRES_DB: ${DB_NAME:-postgres}
+      TZ: Asia/Tokyo
+
+networks:
+  sandbox:
+    name: "sandbox-network"
+    ipam:
+      driver: default
+      config:
+        - subnet: "192.168.0.0/24"
+
+volumes:
+  sandbox-db:
