@@ -2,8 +2,16 @@
 ## 参考
 [チュートリアル](https://dev.classmethod.jp/articles/go-sample-rest-api/)
 
-## 構成
-- docker compose
+## 起動
+- docker db
+```zsh
+make db-up
+make
+```
 
-## 用途
-- ローカル go 開発環境
+- cloud sql proxy
+```zsh
+make proxy-up
+make
+```
+
