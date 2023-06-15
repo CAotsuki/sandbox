@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 
 	"sandbox/pkg/controller"
 	"sandbox/pkg/model/repository"
@@ -13,12 +15,18 @@ var tc = controller.NewTodoController(tr)
 var ro = controller.NewRouter(tc)
 
 func main() {
-	server := http.Server{
-		Addr: ":8080",
+	port := os.Getenv("API_PORT")
+	if port == "" {
+		port = "8080"
 	}
+	log.Printf("Listening on port %s", port)
+
 	http.HandleFunc("/", homeLink)
 	http.HandleFunc("/todos/", ro.HandleTodoRequest)
-	server.ListenAndServe()
+
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func homeLink(w http.ResponseWriter, r *http.Request) {

@@ -2,34 +2,67 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
-	"os"
+	"log"
+	"sync"
+	"time"
 
 	"github.com/joho/godotenv"
-
-	_ "github.com/lib/pq"
 )
 
-var Db *sql.DB
+var (
+	db   *sql.DB
+	once sync.Once
+)
+
+func GetDB() *sql.DB {
+	once.Do(func() {
+		db = mustConnect()
+	})
+	return db
+}
 
 func init() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		panic(err)
+		log.Printf("error cannot load .env: %s", err)
 	}
+}
 
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	user := os.Getenv("DB_USER")
-	pass := os.Getenv("DB_PASS")
-	name := os.Getenv("DB_NAME")
+func migrateDB(db *sql.DB) error {
+	createTodos := `CREATE TABLE IF NOT EXISTS todo (
+		id SERIAL NOT NULL,
+		title VARCHAR(40) NOT NULL,
+		content VARCHAR(100) NOT NULL,
+		create_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		update_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY (id)
+	);`
+	_, err := db.Exec(createTodos)
+	return err
+}
 
-	dataSourceName := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, pass, name,
+func mustConnect() *sql.DB {
+	var (
+		db  *sql.DB
+		err error
 	)
 
-	Db, err = sql.Open("postgres", dataSourceName)
+	db, err = connctTCPSocket()
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to connect to database: %s", err)
 	}
+
+	if err := migrateDB(db); err != nil {
+		log.Fatalf("unable to create table: %s", err)
+	}
+
+	return db
+}
+
+// configureConnectionPool sets database connection pool properties.
+// For more information, see https://golang.org/pkg/database/sql
+func configureConnectionPool(db *sql.DB) {
+	db.SetMaxIdleConns(5)
+	db.SetMaxOpenConns(7)
+	db.SetConnMaxLifetime(1800 * time.Second)
 }
