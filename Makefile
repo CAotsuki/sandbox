@@ -27,4 +27,5 @@ psql:
 
 # proxy
 proxy-up:
+	source .env
 	zsh script/cloud_sql_proxy.sh
