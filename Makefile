@@ -2,6 +2,9 @@
 run:
 	go run cmd/main.go
 
+build:
+	go build -o sandbox cmd/main.go
+
 curl:
 	curl localhost:8080
 
