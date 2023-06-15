@@ -56,6 +56,10 @@ func mustConnect() *sql.DB {
 		log.Fatalf("unable to create table: %s", err)
 	}
 
+	if db == nil {
+		log.Fatalf("no database connection")
+	}
+
 	return db
 }
 
